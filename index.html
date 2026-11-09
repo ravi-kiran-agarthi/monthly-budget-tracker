@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Monthly Budget Cards</title>
+  <link rel="stylesheet" href="style.css">
+  <script>try { const t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {}</script>
+</head>
+<body>
+  <header>
+    <h1>Monthly Budget Cards</h1>
+    <label>Theme <select id="theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+  </header>
+  <main>
+    <p id="message" role="status" aria-live="polite"></p>
+    <section id="setup" class="panel" hidden>
+      <h2>Setup required</h2>
+      <p>This site needs a Firebase project before accounts and expenses can be used. Follow the setup instructions in the repository README.</p>
+    </section>
+    <section id="auth" class="panel" hidden>
+      <h2>Welcome</h2>
+      <p>Sign in with your email to keep your budgets and expenses private across devices.</p>
+      <form id="auth-form">
+        <label>Email <input id="email" type="email" autocomplete="email" required></label>
+        <label>Password <input id="password" type="password" autocomplete="current-password" minlength="6" required></label>
+        <div class="actions"><button type="submit">Sign in</button><button type="button" id="signup" class="secondary">Create account</button><button type="button" id="reset" class="text">Forgot password?</button></div>
+      </form>
+    </section>
+    <div id="app" hidden>
+      <div class="toolbar">
+        <p>Signed in as <strong id="user-email"></strong> <button id="signout" class="text">Sign out</button></p>
+        <label>Month <input type="month" id="month" required></label>
+      </div>
+      <section>
+        <h2>Monthly overview</h2>
+        <p class="muted">Set a budget for each category, then add expenses to see where you stand.</p>
+        <div id="summary" class="summary" aria-live="polite"></div>
+        <div id="cards" class="grid"></div>
+      </section>
+      <div class="columns">
+        <section class="panel">
+          <h2>Set monthly budgets</h2>
+          <p class="muted">Budgets apply only to the selected month. Leave a category blank if you have not set a budget.</p>
+          <form id="budget-form">
+            <div id="budget-inputs" class="form-grid"></div>
+            <button type="submit">Save budgets</button>
+          </form>
+        </section>
+        <section class="panel">
+          <h2>Add an expense</h2>
+          <form id="expense-form">
+            <label>Category <select id="category" required></select></label>
+            <label>Amount (USD) <input id="amount" type="number" min="0.01" max="1000000" step="0.01" inputmode="decimal" required></label>
+            <label>Date <input id="date" type="date" required></label>
+            <label>Note <input id="note" type="text" maxlength="120" placeholder="Optional"></label>
+            <button type="submit">Add expense</button>
+          </form>
+        </section>
+      </div>
+      <section>
+        <h2>Expenses</h2>
+        <div id="expenses"></div>
+      </section>
+    </div>
+  </main>
+  <footer>Amounts are shown in US dollars. Your data is stored in your configured Firebase project.</footer>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

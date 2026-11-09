@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    function validBudget(budgets, name) {
+      return !(name in budgets) || (budgets[name] is int && budgets[name] >= 0 && budgets[name] <= 100000000);
+    }
+    match /users/{uid}/months/{month} {
+      allow read, delete: if owner(uid);
+      allow create, update: if owner(uid)
+        && month.matches('[0-9]{4}-(0[1-9]|1[0-2])')
+        && request.resource.data.keys().hasOnly(['budgets'])
+        && request.resource.data.budgets is map
+        && request.resource.data.budgets.keys().hasOnly(['food', 'groceries', 'coffee', 'movies'])
+        && validBudget(request.resource.data.budgets, 'food')
+        && validBudget(request.resource.data.budgets, 'groceries')
+        && validBudget(request.resource.data.budgets, 'coffee')
+        && validBudget(request.resource.data.budgets, 'movies');
+      match /expenses/{expense} {
+        allow read, delete: if owner(uid);
+        allow create, update: if owner(uid)
+          && month.matches('[0-9]{4}-(0[1-9]|1[0-2])')
+          && request.resource.data.keys().hasAll(['category', 'amount', 'date', 'note'])
+          && request.resource.data.keys().hasOnly(['category', 'amount', 'date', 'note'])
+          && request.resource.data.category in ['food', 'groceries', 'coffee', 'movies']
+          && request.resource.data.amount is int
+          && request.resource.data.amount > 0 && request.resource.data.amount <= 100000000
+          && request.resource.data.date is string
+          && request.resource.data.date.matches(month + '-(0[1-9]|[12][0-9]|3[01])')
+          && request.resource.data.note is string && request.resource.data.note.size() <= 120;
+      }
+    }
+  }
+}
